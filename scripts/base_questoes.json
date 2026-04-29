@@ -1,0 +1,72 @@
+[
+  {
+    "disciplina": "Ética Profissional",
+    "assunto": "Direitos do Advogado",
+    "enunciado": "Um advogado é impedido de ingressar em uma sala de audiências mesmo portando sua carteira da OAB. Segundo o Estatuto, o advogado tem o direito de:",
+    "alternativa_a": "Ingressar livremente em qualquer sala de sessões, mesmo além dos cancelos.",
+    "alternativa_b": "Apenas ingressar se acompanhado pelo cliente.",
+    "alternativa_c": "Ingressar apenas com autorização prévia do magistrado.",
+    "alternativa_d": "Aguardar do lado de fora até ser chamado pelo oficial de justiça.",
+    "resposta_correta": "A",
+    "id_artigo_planalto": "L8906#Art7_VI",
+    "url_planalto": "https://www.planalto.gov.br/ccivil_03/leis/l8906.htm#art7vi",
+    "nexo_ia": "Prerrogativas são o tema mais cobrado em Ética. O Art. 7º garante o livre ingresso, ponto fundamental para a dignidade da profissão.",
+    "peso_incidencia": 5
+  },
+  {
+    "disciplina": "Direito Civil",
+    "assunto": "Direito das Sucessões",
+    "enunciado": "João falece deixando três filhos e um patrimônio considerável. Não deixou testamento. Na sucessão legítima, como será a divisão?",
+    "alternativa_a": "O filho mais velho recebe a maior parte (primogenitura).",
+    "alternativa_b": "A herança é dividida em partes iguais entre os descendentes do mesmo grau.",
+    "alternativa_c": "O Estado fica com 50% e o restante é dividido entre os filhos.",
+    "alternativa_d": "Os filhos homens recebem o dobro do que as filhas mulheres.",
+    "resposta_correta": "B",
+    "id_artigo_planalto": "CC#Art1834",
+    "url_planalto": "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm#art1834",
+    "nexo_ia": "Direito das Sucessões na OAB foca muito na ordem da sucessão legítima. Art. 1.834 do Código Civil: igualdade entre os herdeiros.",
+    "peso_incidencia": 4
+  },
+  {
+    "disciplina": "Direito do Trabalho",
+    "assunto": "Rescisão Contratual",
+    "enunciado": "Um empregado comete falta grave ao praticar ato de improbidade no ambiente de trabalho. A dispensa correta para este caso é:",
+    "alternativa_a": "Rescisão indireta.",
+    "alternativa_b": "Dispensa sem justa causa com aviso prévio.",
+    "alternativa_c": "Dispensa por justa causa.",
+    "alternativa_d": "Culpa recíproca.",
+    "resposta_correta": "C",
+    "id_artigo_planalto": "CLT#Art482_A",
+    "url_planalto": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art482",
+    "nexo_ia": "O Art. 482 da CLT é o 'campeão' de incidência em Trabalho. Improbidade é a alínea 'a', gerando a justa causa imediata.",
+    "peso_incidencia": 5
+  },
+  {
+    "disciplina": "Direito Administrativo",
+    "assunto": "Licitações",
+    "enunciado": "De acordo com a Nova Lei de Licitações (Lei 14.133/2021), a modalidade de licitação destinada à escolha de trabalho técnico, científico ou artístico é o:",
+    "alternativa_a": "Leilão.",
+    "alternativa_b": "Concurso.",
+    "alternativa_c": "Diálogo Competitivo.",
+    "alternativa_d": "Pregão.",
+    "resposta_correta": "B",
+    "id_artigo_planalto": "L14133#Art30",
+    "url_planalto": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm#art30",
+    "nexo_ia": "Atenção à Lei 14.133! O Concurso (Art. 30) mantém sua essência para trabalhos artísticos e técnicos, tema recorrente em provas recentes.",
+    "peso_incidencia": 5
+  },
+  {
+    "disciplina": "Direito Tributário",
+    "assunto": "Imunidades",
+    "enunciado": "Templos de qualquer culto possuem imunidade tributária em relação a quais tributos?",
+    "alternativa_a": "Apenas taxas de coleta de lixo.",
+    "alternativa_b": "Impostos sobre o patrimônio, renda e serviços relacionados à sua finalidade essencial.",
+    "alternativa_c": "Contribuições de melhoria apenas.",
+    "alternativa_d": "Todo e qualquer tipo de tributo (impostos, taxas e contribuições).",
+    "resposta_correta": "B",
+    "id_artigo_planalto": "CF88#Art150_VI_B",
+    "url_planalto": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm#art150vibi",
+    "nexo_ia": "Imunidade religiosa é 'clássico' de Tributário. Lembre-se: imunidade é só para IMPOSTOS (Art. 150, VI, 'b' da CF), não para taxas.",
+    "peso_incidencia": 5
+  }
+]
