@@ -1,41 +1,25 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import AuthScreen from './src/screens/AuthScreen';
+import MainNavigator from './src/navigation/MainNavigator';
 
-// Telas
-import HomeScreen from './src/screens/HomeScreen';
-import QuestaoScreen from './src/screens/QuestaoScreen';
-import ConfigScreen from './src/screens/ConfigScreen';
+function RootLayout() {
+  const { user, loading } = useAuth();
 
-const Tab = createBottomTabNavigator();
+  if (loading) return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
+      <ActivityIndicator size="large" color="#4F46E5" />
+    </View>
+  );
+
+  return user ? <MainNavigator /> : <AuthScreen />;
+}
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar barStyle="dark-content" />
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: '#4F46E5', // Indigo que usamos nas questões
-          tabBarInactiveTintColor: '#94A3B8',
-          tabBarStyle: {
-            backgroundColor: '#FFFFFF',
-            borderTopWidth: 1,
-            borderTopColor: '#E2E8F0',
-            height: 60,
-            paddingBottom: 8
-          },
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600'
-          }
-        }}
-      >
-        <Tab.Screen name="Início" component={HomeScreen} />
-        <Tab.Screen name="Simulados" component={QuestaoScreen} />
-        <Tab.Screen name="Perfil" component={ConfigScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <RootLayout />
+    </AuthProvider>
   );
 }
