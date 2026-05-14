@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { View, ActivityIndicator, StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import AuthScreen from './src/screens/AuthScreen';
 import MainNavigator from './src/navigation/MainNavigator';
+import MotivacionalModal from './src/components/MotivacionalModal';
 
 function RootLayout() {
   const { user, loading } = useAuth();
@@ -13,13 +15,21 @@ function RootLayout() {
     </View>
   );
 
-  return user ? <MainNavigator /> : <AuthScreen />;
+  return (
+    <>
+      {user && <MotivacionalModal />}  {/* só aparece se estiver logado */}
+      {user ? <MainNavigator /> : <AuthScreen />}
+    </>
+  );
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <RootLayout />
+      <NavigationContainer>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+        <RootLayout />
+      </NavigationContainer>
     </AuthProvider>
   );
 }
