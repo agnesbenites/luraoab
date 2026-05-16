@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, FlatList
+  ActivityIndicator, FlatList, TextInput, Alert
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +28,54 @@ const DISCIPLINAS = [
   { id: 'Direito Empresarial', label: 'EMPRESARIAL' },
 ];
 
+// Mapa de subtemas por disciplina para geração de questões direcionadas
+const SUBTEMAS_POR_DISCIPLINA = {
+  'Direito Constitucional': [
+    'Direitos e garantias fundamentais', 'Organização dos poderes', 'Controle de constitucionalidade',
+    'Federação e repartição de competências', 'Processo legislativo', 'Remédios constitucionais'
+  ],
+  'Direito Administrativo': [
+    'Atos administrativos', 'Poderes da administração', 'Licitações e contratos', 'Agentes públicos',
+    'Responsabilidade civil do Estado', 'Serviços públicos', 'Intervenção do Estado na propriedade'
+  ],
+  'Direito Civil': [
+    'Teoria das obrigações', 'Contratos típicos e atípicos', 'Responsabilidade civil',
+    'Direito das coisas', 'Direito de família', 'Direito das sucessões'
+  ],
+  'Direito Processual Civil': [
+    'Petição inicial e requisitos', 'Tutelas provisórias', 'Recursos', 'Cumprimento de sentença',
+    'Provas', 'Processo de execução', 'Ações constitucionais'
+  ],
+  'Direito Penal': [
+    'Teoria do crime', 'Penalidades', 'Crimes contra a pessoa', 'Crimes contra o patrimônio',
+    'Crimes contra a administração pública', 'Lei de drogas'
+  ],
+  'Direito Processual Penal': [
+    'Inquérito policial', 'Ação penal', 'Medidas cautelares', 'Provas no processo penal',
+    'Recursos', 'Execução penal', 'Tribunal do Júri'
+  ],
+  'Direito do Trabalho': [
+    'Contrato de trabalho', 'Remuneração e salário', 'Jornada de trabalho', 'Rescisão contratual',
+    'Estabilidade e garantias', 'Férias e 13º salário'
+  ],
+  'Direito Processual do Trabalho': [
+    'Dissídio individual e coletivo', 'Recursos trabalhistas', 'Execução trabalhista',
+    'Provas no processo do trabalho', 'Prazos processuais'
+  ],
+  'Direito Tributário': [
+    'Princípios tributários', 'Impostos federais, estaduais e municipais', 'Obrigação tributária',
+    'Crédito tributário e execução fiscal', 'Processo administrativo fiscal'
+  ],
+  'Direito Empresarial': [
+    'Teoria da empresa', 'Sociedades empresárias', 'Títulos de crédito', 'Falência e recuperação judicial',
+    'Registro empresarial', 'Propriedade industrial'
+  ],
+  'Ética Profissional': [
+    'Estatuto da OAB', 'Código de Ética', 'Inscrição e registro', 'Publicidade e honorários',
+    'Processo ético-disciplinar', 'Deveres e vedações'
+  ]
+};
+
 export default function QuestaoScreen({ route, navigation }) {
   const { user } = useAuth();
   const sessao = route?.params?.sessao ?? null;
@@ -38,6 +86,16 @@ export default function QuestaoScreen({ route, navigation }) {
   const [opcaoSelecionada, setOpcaoSelecionada] = useState(null);
   const [filtro, setFiltro] = useState('todas');
 
+  // Estados para resposta dissertativa
+  const [respostaAluno, setRespostaAluno] = useState('');
+  const [corrigindo, setCorrigindo] = useState(false);
+  const [correcao, setCorrecao] = useState(null);
+  
+  // Estados para geração de questão discursiva por IA
+  const [gerandoDiscursiva, setGerandoDiscursiva] = useState(false);
+  const [questaoGerada, setQuestaoGerada] = useState(null);
+  const [modoDiscursivaIA, setModoDiscursivaIA] = useState(false);
+
   const [explicacao, setExplicacao] = useState('');
   const [artigosCitados, setArtigosCitados] = useState([]);
   const [loadingAI, setLoadingAI] = useState(false);
@@ -47,16 +105,28 @@ export default function QuestaoScreen({ route, navigation }) {
   const [tempoSegundos, setTempoSegundos] = useState(0);
   const intervaloRef = useRef(null);
 
+  // Obter disciplina atual para geração
+  const getDisciplinaAtual = () => {
+    if (modoDiscursivaIA && questaoGerada) {
+      return questaoGerada.disciplina;
+    }
+    if (sessao?.disciplina) return sessao.disciplina;
+    if (filtro !== 'todas') return filtro;
+    return questao?.disciplina || null;
+  };
+
   useEffect(() => {
     fetchQuestao();
   }, [filtro]);
 
   useEffect(() => {
-    if (!loading && questao) {
+    if (!loading && (questao || questaoGerada)) {
       iniciarCronometro();
+      setRespostaAluno('');
+      setCorrecao(null);
     }
     return () => pararCronometro();
-  }, [questao, loading]);
+  }, [questao, questaoGerada, loading]);
 
   function iniciarCronometro() {
     pararCronometro();
@@ -86,8 +156,11 @@ export default function QuestaoScreen({ route, navigation }) {
       setOpcaoSelecionada(null);
       setExplicacao('');
       setArtigosCitados([]);
+      setRespostaAluno('');
+      setCorrecao(null);
+      setModoDiscursivaIA(false);
+      setQuestaoGerada(null);
 
-      // Busca IDs já respondidos nesta sessão para não repetir
       let idsRespondidos = [];
       if (sessao?.id) {
         const { data: respondidas } = await supabase
@@ -97,9 +170,7 @@ export default function QuestaoScreen({ route, navigation }) {
         idsRespondidos = (respondidas ?? []).map(r => r.questao_id);
       }
 
-      // Modo DIAGNÓSTICO
       if (sessao?.modo === 'diagnostico') {
-        // Distribuição por disciplina do diagnóstico
         const DISTRIBUICAO = [
           { disciplina: 'Ética Profissional', qtd: 5 },
           { disciplina: 'Direito Civil', qtd: 5 },
@@ -112,7 +183,6 @@ export default function QuestaoScreen({ route, navigation }) {
           { disciplina: 'Direito Tributário', qtd: 5 },
         ];
 
-        // Descobre qual disciplina buscar baseado no progresso atual
         const { data: respondidas } = await supabase
           .from('progresso')
           .select('questao_id, disciplina')
@@ -124,8 +194,6 @@ export default function QuestaoScreen({ route, navigation }) {
         });
 
         const idsRespondidos = (respondidas ?? []).map(r => r.questao_id);
-
-        // Acha a próxima disciplina que ainda tem cota disponível
         const proxDisc = DISTRIBUICAO.find(d =>
           (contagemPorDisc[d.disciplina] ?? 0) < d.qtd
         );
@@ -157,7 +225,6 @@ export default function QuestaoScreen({ route, navigation }) {
 
       let query = supabase.from('questoes').select('*');
 
-      // Filtra pela sessão ou pelo filtro manual
       if (sessao?.modo === 'simulado_edicao' && sessao?.edicao) {
         query = query.eq('origem', sessao.edicao);
       } else if (sessao?.modo === 'por_materia' && sessao?.disciplina) {
@@ -166,7 +233,6 @@ export default function QuestaoScreen({ route, navigation }) {
         query = query.eq('disciplina', filtro);
       }
 
-      // Exclui já respondidas nesta sessão
       if (idsRespondidos.length > 0) {
         query = query.not('id', 'in', `(${idsRespondidos.join(',')})`);
       }
@@ -176,7 +242,7 @@ export default function QuestaoScreen({ route, navigation }) {
       if (data && data.length > 0) {
         setQuestao(data[Math.floor(Math.random() * data.length)]);
       } else {
-        setQuestao(null); // Todas as questões da edição foram respondidas
+        setQuestao(null);
       }
     } catch (err) {
       console.error(err);
@@ -185,16 +251,95 @@ export default function QuestaoScreen({ route, navigation }) {
     }
   }
 
-  async function salvarProgresso(foiAcerto) {
+  // Gerar questão discursiva por IA
+  async function gerarQuestaoDiscursiva() {
+    const disciplinaAtual = getDisciplinaAtual();
+    
+    if (!disciplinaAtual || disciplinaAtual === 'todas') {
+      Alert.alert(
+        'Selecione uma matéria',
+        'Para gerar uma questão discursiva, primeiro selecione uma disciplina específica no filtro acima.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setGerandoDiscursiva(true);
+    
+    try {
+      const subtemas = SUBTEMAS_POR_DISCIPLINA[disciplinaAtual] || ['Temas gerais da matéria'];
+      const subtemaAleatorio = subtemas[Math.floor(Math.random() * subtemas.length)];
+
+      const res = await groq.chat.completions.create({
+        messages: [
+          { 
+            role: "system", 
+            content: `Você é um examinador da OAB. Crie uma questão discursiva de nível avançado sobre ${disciplinaAtual}, focando especificamente em: ${subtemaAleatorio}.
+
+A questão deve:
+1. Apresentar um caso prático realista
+2. Cobrar conhecimento específico da legislação
+3. Exigir argumentação jurídica fundamentada
+4. Ter entre 3 a 5 linhas de enunciado
+
+Retorne APENAS o enunciado da questão, sem explicações adicionais.` 
+          }
+        ],
+        model: "llama-3.3-70b-versatile",
+      });
+
+      const enunciadoGerado = res.choices[0].message.content;
+      
+      // Gerar também um espelho de correção para esta questão
+      const resEspelho = await groq.chat.completions.create({
+        messages: [
+          { 
+            role: "system", 
+            content: `Com base na questão abaixo, crie um ESPELHO DE CORREÇÃO para a OAB contendo:
+1. OS PONTOS OBRIGATÓRIOS que o candidato deve abordar
+2. A LEGISLAÇÃO APLICÁVEL (artigos específicos)
+3. OS FUNDAMENTOS JURÍDICOS esperados
+
+Seja objetivo e direto, como uma banca examinadora.` 
+          },
+          { role: "user", content: enunciadoGerado }
+        ],
+        model: "llama-3.3-70b-versatile",
+      });
+
+      setQuestaoGerada({
+        enunciado: enunciadoGerado,
+        disciplina: disciplinaAtual,
+        espelhoCorrecao: resEspelho.choices[0].message.content,
+        origem: 'IA Generator',
+        tipo: 'discursiva_ia'
+      });
+      
+      setModoDiscursivaIA(true);
+      setRespondida(false);
+      setCorrecao(null);
+      setRespostaAluno('');
+      
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Erro', 'Não foi possível gerar a questão. Tente novamente.');
+    } finally {
+      setGerandoDiscursiva(false);
+    }
+  }
+
+  async function salvarProgresso(foiAcerto, tipo = 'multipla_escolha') {
     try {
       pararCronometro();
       await supabase.from('progresso').insert([{
-        questao_id: questao.id,
-        disciplina: questao.disciplina,
+        questao_id: modoDiscursivaIA ? null : questao?.id,
+        disciplina: modoDiscursivaIA ? questaoGerada?.disciplina : questao?.disciplina,
         acertou: foiAcerto,
         tempo_segundos: tempoSegundos,
         user_id: user.id,
         sessao_id: sessao?.id ?? null,
+        tipo: tipo,
+        ...(modoDiscursivaIA && { questao_texto: questaoGerada?.enunciado })
       }]);
 
       if (sessao?.id) {
@@ -208,7 +353,6 @@ export default function QuestaoScreen({ route, navigation }) {
           })
           .eq('id', sessao.id);
 
-        // Marca diagnóstico ou simulado completo como concluído ao atingir o limite
         if (sessao?.modo === 'diagnostico' || sessao?.modo === 'simulado_completo') {
           const limite = sessao.modo === 'diagnostico' ? 40 : 80;
 
@@ -218,7 +362,6 @@ export default function QuestaoScreen({ route, navigation }) {
               .update({ diagnostico_concluido: true, concluida: true })
               .eq('id', sessao.id);
             
-            // Atualiza a sessão local
             sessao.diagnostico_concluido = true;
             sessao.concluida = true;
           }
@@ -230,14 +373,112 @@ export default function QuestaoScreen({ route, navigation }) {
   }
 
   const validarResposta = (letra) => {
-    if (respondida) return;
+    if (respondida || modoDiscursivaIA) return;
     const foiAcerto = letra === questao.resposta_correta;
     setOpcaoSelecionada(letra);
     setRespondida(true);
-    salvarProgresso(foiAcerto);
+    salvarProgresso(foiAcerto, 'multipla_escolha');
   };
 
+  async function corrigirRespostaDissertativa() {
+    if (!respostaAluno.trim()) {
+      Alert.alert('Atenção', 'Digite sua resposta antes de corrigir');
+      return;
+    }
+
+    setCorrigindo(true);
+    setCorrecao(null);
+
+    const questaoAtual = modoDiscursivaIA ? questaoGerada : questao;
+    
+    try {
+      let promptSistema = `Você é um corretor da prova da OAB. Analise a resposta do aluno e forneça:
+
+1. NOTA SUGERIDA: Dê uma nota de 0 a 10 baseada nos critérios da OAB
+2. ESPELHO ESPERADO: O que a banca esperava como resposta completa
+3. ACERTOS: Pontos que o aluno acertou
+4. OMISSÕES: Pontos importantes que faltaram
+5. MELHORIA DE REDAÇÃO JURÍDICA: Sugestões específicas
+
+Seja objetivo, construtivo e específico. Use formatação clara com emojis.`;
+
+      let conteudoUsuario = `QUESTÃO: ${questaoAtual.enunciado}\n\nRESPOSTA DO ALUNO: ${respostaAluno}`;
+
+      if (modoDiscursivaIA && questaoGerada?.espelhoCorrecao) {
+        conteudoUsuario += `\n\nESPELHO DE CORREÇÃO OFICIAL:\n${questaoGerada.espelhoCorrecao}`;
+      } else if (!modoDiscursivaIA && questao?.resposta_correta) {
+        conteudoUsuario += `\n\nALTERNATIVA CORRETA: ${questao.resposta_correta}\nRESPOSTA CORRETA ESPERADA: ${questao[`alternativa_${questao.resposta_correta.toLowerCase()}`]}`;
+      }
+
+      const res = await groq.chat.completions.create({
+        messages: [
+          { role: "system", content: promptSistema },
+          { role: "user", content: conteudoUsuario }
+        ],
+        model: "llama-3.3-70b-versatile",
+      });
+
+      const textoCorrecao = res.choices[0].message.content;
+      
+      const sections = {
+        nota: '',
+        espelho: '',
+        acertos: '',
+        omissoes: '',
+        melhoria: ''
+      };
+
+      const lines = textoCorrecao.split('\n');
+      let currentSection = '';
+      
+      for (const line of lines) {
+        if (line.includes('NOTA SUGERIDA') || line.includes('🎯')) {
+          currentSection = 'nota';
+          sections.nota += line + '\n';
+        } else if (line.includes('ESPELHO ESPERADO') || line.includes('📋')) {
+          currentSection = 'espelho';
+          sections.espelho += line + '\n';
+        } else if (line.includes('ACERTOS') || line.includes('✅')) {
+          currentSection = 'acertos';
+          sections.acertos += line + '\n';
+        } else if (line.includes('OMISSÕES') || line.includes('❌')) {
+          currentSection = 'omissoes';
+          sections.omissoes += line + '\n';
+        } else if (line.includes('MELHORIA') || line.includes('📝')) {
+          currentSection = 'melhoria';
+          sections.melhoria += line + '\n';
+        } else if (currentSection && line.trim()) {
+          sections[currentSection] += line + '\n';
+        }
+      }
+
+      setCorrecao(sections);
+      setRespondida(true);
+      
+      if (modoDiscursivaIA && !respondida) {
+        await salvarProgresso(null, 'discursiva_ia');
+      }
+      
+    } catch (err) {
+      console.error(err);
+      setCorrecao({
+        nota: '⚠️ Erro na correção',
+        espelho: 'Não foi possível gerar a correção no momento.',
+        acertos: 'Tente novamente mais tarde.',
+        omissoes: '',
+        melhoria: ''
+      });
+    } finally {
+      setCorrigindo(false);
+    }
+  }
+
   async function pedirLuraExplica() {
+    if (modoDiscursivaIA) {
+      Alert.alert('Modo Discursiva', 'Para questões discursivas, utilize a correção com IA acima para obter feedback detalhado.');
+      return;
+    }
+    
     try {
       setLoadingAI(true);
       const res = await groq.chat.completions.create({
@@ -259,11 +500,14 @@ export default function QuestaoScreen({ route, navigation }) {
     setModalVade(true);
     setLoadingVade(true);
     setExplicacao('');
+    
+    const questaoAtual = modoDiscursivaIA ? questaoGerada : questao;
+    
     try {
       const res = await groq.chat.completions.create({
         messages: [
           { role: "system", content: "Liste os artigos da lei seca fundamentais para esta questão. Formate cada artigo começando com 'Art.' e separe-os por uma quebra de linha." },
-          { role: "user", content: `Questão: ${questao.enunciado}.` }
+          { role: "user", content: `Questão: ${questaoAtual.enunciado}.` }
         ],
         model: "llama-3.3-70b-versatile",
       });
@@ -297,6 +541,9 @@ export default function QuestaoScreen({ route, navigation }) {
   }
 
   const mostrarFiltros = !sessao || sessao.modo === 'aleatorio' || sessao.modo === 'por_materia';
+  const questaoAtual = modoDiscursivaIA ? questaoGerada : questao;
+  const disciplinaAtual = getDisciplinaAtual();
+  const podeGerarDiscursiva = disciplinaAtual && disciplinaAtual !== 'todas';
 
   return (
     <View style={styles.safeContainer}>
@@ -309,8 +556,7 @@ export default function QuestaoScreen({ route, navigation }) {
         conteudo={explicacao}
       />
 
-      {/* Cronômetro + Botão Voltar */}
-      {!loading && questao && (
+      {!loading && questaoAtual && (
         <View style={styles.cronometroBar}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btnVoltar}>
             <Text style={styles.btnVoltarText}>← Home</Text>
@@ -323,30 +569,27 @@ export default function QuestaoScreen({ route, navigation }) {
             ⏱ {formatarTempo(tempoSegundos)}
           </Text>
           {sessao && (
-            <>
-              <Text style={styles.sessaoInfo}>
-                {sessao.questoes_respondidas ?? 0} respondidas
+            <Text style={styles.sessaoInfo}>
+              {sessao.questoes_respondidas ?? 0} respondidas
+            </Text>
+          )}
+          {sessao?.modo === 'diagnostico' && (
+            <View style={styles.diagnosticoBanner}>
+              <Text style={styles.diagnosticoText}>
+                🩺 {sessao.questoes_respondidas ?? 0}/40
               </Text>
-              {sessao?.modo === 'diagnostico' && (
-                <View style={styles.diagnosticoBanner}>
-                  <Text style={styles.diagnosticoText}>
-                    🩺 {sessao.questoes_respondidas ?? 0}/40
-                  </Text>
-                  <View style={styles.diagnosticoBarraFundo}>
-                    <View style={[
-                      styles.diagnosticoBarraPreenchida,
-                      { width: `${((sessao.questoes_respondidas ?? 0) / 40) * 100}%` }
-                    ]} />
-                  </View>
-                </View>
-              )}
-            </>
+              <View style={styles.diagnosticoBarraFundo}>
+                <View style={[
+                  styles.diagnosticoBarraPreenchida,
+                  { width: `${((sessao.questoes_respondidas ?? 0) / 40) * 100}%` }
+                ]} />
+              </View>
+            </View>
           )}
         </View>
       )}
 
-      {/* Filtros por matéria */}
-      {mostrarFiltros && (
+      {mostrarFiltros && !modoDiscursivaIA && (
         <View style={styles.headerFiltros}>
           <FlatList
             data={DISCIPLINAS}
@@ -373,7 +616,7 @@ export default function QuestaoScreen({ route, navigation }) {
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#4F46E5" />
           </View>
-        ) : !questao ? (
+        ) : !questaoAtual ? (
           <View style={styles.center}>
             <Text style={styles.emptyText}>⚖️ Nenhuma questão encontrada.</Text>
             {sessao?.modo === 'diagnostico' && (
@@ -393,37 +636,143 @@ export default function QuestaoScreen({ route, navigation }) {
         ) : (
           <>
             <View style={styles.metaContainer}>
-              <Text style={styles.origemText}>{questao.origem} • {questao.disciplina}</Text>
+              <Text style={styles.origemText}>
+                {questaoAtual.origem || 'IA Generator'} • {questaoAtual.disciplina}
+                {modoDiscursivaIA && ' • 🧠 Questão Gerada por IA'}
+              </Text>
             </View>
 
             <View style={styles.enunciadoCard}>
-              <Text style={styles.enunciadoTexto}>{questao.enunciado}</Text>
+              <Text style={styles.enunciadoTexto}>{questaoAtual.enunciado}</Text>
             </View>
 
-            <View style={styles.alternativasWrapper}>
-              {['A', 'B', 'C', 'D'].map((letra) => {
-                const isCorreta = respondida && letra === questao.resposta_correta;
-                const isErrada = respondida && opcaoSelecionada === letra && letra !== questao.resposta_correta;
-                return (
-                  <TouchableOpacity
-                    key={letra}
-                    onPress={() => validarResposta(letra)}
-                    style={[
-                      styles.opcaoCard,
-                      opcaoSelecionada === letra && styles.opcaoFoco,
-                      isCorreta && styles.opcaoSucesso,
-                      isErrada && styles.opcaoFalha,
-                      respondida && letra !== questao.resposta_correta && letra !== opcaoSelecionada && { opacity: 0.4 }
-                    ]}
-                  >
-                    <View style={[styles.letraContainer, isCorreta && styles.letraSucesso, isErrada && styles.letraFalha]}>
-                      <Text style={[styles.letraLabel, (isCorreta || isErrada) && { color: '#FFF' }]}>{letra}</Text>
+            {!modoDiscursivaIA && (
+              <View style={styles.alternativasWrapper}>
+                {['A', 'B', 'C', 'D'].map((letra) => {
+                  const isCorreta = respondida && letra === questao.resposta_correta;
+                  const isErrada = respondida && opcaoSelecionada === letra && letra !== questao.resposta_correta;
+                  return (
+                    <TouchableOpacity
+                      key={letra}
+                      onPress={() => validarResposta(letra)}
+                      style={[
+                        styles.opcaoCard,
+                        opcaoSelecionada === letra && styles.opcaoFoco,
+                        isCorreta && styles.opcaoSucesso,
+                        isErrada && styles.opcaoFalha,
+                        respondida && letra !== questao.resposta_correta && letra !== opcaoSelecionada && { opacity: 0.4 }
+                      ]}
+                    >
+                      <View style={[styles.letraContainer, isCorreta && styles.letraSucesso, isErrada && styles.letraFalha]}>
+                        <Text style={[styles.letraLabel, (isCorreta || isErrada) && { color: '#FFF' }]}>{letra}</Text>
+                      </View>
+                      <Text style={styles.opcaoTexto}>{questao[`alternativa_${letra.toLowerCase()}`]}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Seção de Resposta Dissertativa */}
+            <View style={styles.respostaDissertativaContainer}>
+              <Text style={styles.respostaDissertativaTitle}>
+                {modoDiscursivaIA ? '📝 Sua Resposta Dissertativa' : '📝 Pratique com Resposta Dissertativa'}
+              </Text>
+              <TextInput
+                style={styles.respostaInput}
+                multiline
+                numberOfLines={8}
+                placeholder={modoDiscursivaIA 
+                  ? "Escreva sua resposta dissertativa aqui. A IA irá corrigir baseada no espelho de correção..." 
+                  : "Que tal treinar também sua argumentação? Escreva uma resposta dissertativa para esta questão e corrija com IA!"}
+                placeholderTextColor="#94A3B8"
+                value={respostaAluno}
+                onChangeText={setRespostaAluno}
+              />
+              
+              <TouchableOpacity 
+                style={styles.btnCorrigirIA}
+                onPress={corrigirRespostaDissertativa}
+                disabled={corrigindo}
+              >
+                {corrigindo ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <Text style={styles.btnCorrigirIAText}>🤖 CORRIGIR COM IA</Text>
+                )}
+              </TouchableOpacity>
+
+              {correcao && (
+                <View style={styles.correcaoContainer}>
+                  <Text style={styles.correcaoTitle}>📊 RESULTADO DA CORREÇÃO</Text>
+                  
+                  {correcao.nota && (
+                    <View style={styles.correcaoSection}>
+                      <Text style={styles.correcaoSectionTitle}>🎯 {correcao.nota.split('\n')[0]}</Text>
+                      {correcao.nota.split('\n').slice(1).map((line, i) => (
+                        <Text key={i} style={styles.correcaoText}>{line}</Text>
+                      ))}
                     </View>
-                    <Text style={styles.opcaoTexto}>{questao[`alternativa_${letra.toLowerCase()}`]}</Text>
-                  </TouchableOpacity>
-                );
-              })}
+                  )}
+
+                  {correcao.espelho && (
+                    <View style={styles.correcaoSection}>
+                      <Text style={styles.correcaoSectionTitle}>📋 O QUE A BANCA ESPERAVA</Text>
+                      {correcao.espelho.split('\n').map((line, i) => (
+                        <Text key={i} style={styles.correcaoText}>{line}</Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {correcao.acertos && (
+                    <View style={styles.correcaoSection}>
+                      <Text style={styles.correcaoSectionTitle}>✅ SEUS ACERTOS</Text>
+                      {correcao.acertos.split('\n').map((line, i) => (
+                        <Text key={i} style={styles.correcaoText}>{line}</Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {correcao.omissoes && (
+                    <View style={styles.correcaoSection}>
+                      <Text style={styles.correcaoSectionTitle}>❌ PONTOS QUE FALTARAM</Text>
+                      {correcao.omissoes.split('\n').map((line, i) => (
+                        <Text key={i} style={styles.correcaoText}>{line}</Text>
+                      ))}
+                    </View>
+                  )}
+
+                  {correcao.melhoria && (
+                    <View style={styles.correcaoSection}>
+                      <Text style={styles.correcaoSectionTitle}>📝 COMO MELHORAR</Text>
+                      {correcao.melhoria.split('\n').map((line, i) => (
+                        <Text key={i} style={styles.correcaoText}>{line}</Text>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
+
+            {/* Botão para gerar nova questão discursiva por IA */}
+            <TouchableOpacity 
+              style={[styles.btnGerarDiscursiva, !podeGerarDiscursiva && styles.btnGerarDiscursivaDisabled]}
+              onPress={gerarQuestaoDiscursiva}
+              disabled={gerandoDiscursiva || !podeGerarDiscursiva}
+            >
+              {gerandoDiscursiva ? (
+                <ActivityIndicator color="#FFF" size="small" />
+              ) : (
+                <>
+                  <Text style={styles.btnGerarDiscursivaText}>🧠 GERAR QUESTÃO DISCURSIVA</Text>
+                  <Text style={styles.btnGerarDiscursivaSubtext}>
+                    {podeGerarDiscursiva 
+                      ? `Baseada em ${disciplinaAtual}` 
+                      : 'Selecione uma matéria no filtro acima'}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
 
             {respondida && (
               <View style={styles.actionsContainer}>
@@ -434,16 +783,18 @@ export default function QuestaoScreen({ route, navigation }) {
                 </View>
 
                 <View style={styles.rowButtons}>
-                  <TouchableOpacity
-                    style={[styles.btnAction, { backgroundColor: '#8B5CF6' }]}
-                    onPress={pedirLuraExplica}
-                    disabled={loadingAI}
-                  >
-                    {loadingAI
-                      ? <ActivityIndicator color="#FFF" />
-                      : <Text style={styles.btnActionText}>✨ LURA EXPLICA</Text>
-                    }
-                  </TouchableOpacity>
+                  {!modoDiscursivaIA && (
+                    <TouchableOpacity
+                      style={[styles.btnAction, { backgroundColor: '#8B5CF6' }]}
+                      onPress={pedirLuraExplica}
+                      disabled={loadingAI}
+                    >
+                      {loadingAI
+                        ? <ActivityIndicator color="#FFF" />
+                        : <Text style={styles.btnActionText}>✨ LURA EXPLICA</Text>
+                      }
+                    </TouchableOpacity>
+                  )}
 
                   <TouchableOpacity
                     style={[styles.btnAction, { backgroundColor: '#10B981' }]}
@@ -453,14 +804,19 @@ export default function QuestaoScreen({ route, navigation }) {
                   </TouchableOpacity>
                 </View>
 
-                {explicacao && !modalVade && (
+                {explicacao && !modalVade && !modoDiscursivaIA && (
                   <View style={styles.quickExplicacao}>
                     <Text style={styles.quickText}>{explicacao}</Text>
                   </View>
                 )}
 
-                <TouchableOpacity style={styles.btnNext} onPress={fetchQuestao}>
-                  <Text style={styles.btnNextText}>PRÓXIMA QUESTÃO →</Text>
+                <TouchableOpacity 
+                  style={styles.btnNext} 
+                  onPress={modoDiscursivaIA ? gerarQuestaoDiscursiva : fetchQuestao}
+                >
+                  <Text style={styles.btnNextText}>
+                    {modoDiscursivaIA ? 'NOVA DISCURSIVA →' : 'PRÓXIMA QUESTÃO →'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -500,36 +856,57 @@ const styles = StyleSheet.create({
   filtroLabelAtivo: { color: '#FFF' },
   container: { flex: 1, paddingHorizontal: 20 },
   center: { height: 500, justifyContent: 'center', alignItems: 'center', gap: 16 },
-  emptyText: { fontSize: 15, fontWeight: 'bold', color: '#64748B' },
+  emptyText: { fontSize: 16, fontWeight: 'bold', color: '#475569' },
   btnVoltarCenter: { backgroundColor: '#EEF2FF', paddingVertical: 12, paddingHorizontal: 24,
     borderRadius: 12 },
   btnVoltarCenterText: { color: '#4F46E5', fontWeight: '700', fontSize: 14 },
   metaContainer: { marginTop: 20, marginBottom: 10 },
-  origemText: { fontSize: 12, color: '#94A3B8', fontWeight: '700' },
+  origemText: { fontSize: 13, color: '#64748B', fontWeight: '700', letterSpacing: 0.5 },
   enunciadoCard: { marginBottom: 25 },
-  enunciadoTexto: { fontSize: 17, color: '#1E293B', lineHeight: 26 },
-  alternativasWrapper: { gap: 10 },
-  opcaoCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 16, borderRadius: 14,
-    borderWidth: 1.5, borderColor: '#F1F5F9', alignItems: 'center' },
-  opcaoFoco: { borderColor: '#4F46E5' },
+  enunciadoTexto: { fontSize: 17, fontWeight: '500', color: '#0F172A', lineHeight: 28, letterSpacing: -0.3 },
+  alternativasWrapper: { gap: 12 },
+  opcaoCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 18, borderRadius: 16,
+    borderWidth: 1.5, borderColor: '#E2E8F0', alignItems: 'center' },
+  opcaoFoco: { borderColor: '#6366F1', borderWidth: 2 },
   opcaoSucesso: { borderColor: '#10B981', backgroundColor: '#F0FDF4' },
   opcaoFalha: { borderColor: '#EF4444', backgroundColor: '#FEF2F2' },
-  letraContainer: { width: 32, height: 32, borderRadius: 8, backgroundColor: '#F1F5F9',
-    justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  letraContainer: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F1F5F9',
+    justifyContent: 'center', alignItems: 'center', marginRight: 16 },
   letraSucesso: { backgroundColor: '#10B981' },
   letraFalha: { backgroundColor: '#EF4444' },
-  letraLabel: { fontWeight: 'bold', color: '#64748B' },
-  opcaoTexto: { flex: 1, fontSize: 15, color: '#334155', lineHeight: 20 },
+  letraLabel: { fontWeight: '800', fontSize: 16, color: '#475569' },
+  opcaoTexto: { flex: 1, fontSize: 15, fontWeight: '500', color: '#1E293B', lineHeight: 22 },
+  
+  respostaDissertativaContainer: { marginTop: 32, marginBottom: 16 },
+  respostaDissertativaTitle: { fontSize: 16, fontWeight: '800', color: '#0F172A', marginBottom: 12 },
+  respostaInput: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, 
+    fontSize: 15, lineHeight: 24, color: '#0F172A', borderWidth: 1.5, borderColor: '#E2E8F0',
+    textAlignVertical: 'top', minHeight: 160 },
+  btnCorrigirIA: { backgroundColor: '#6366F1', borderRadius: 16, padding: 16, alignItems: 'center',
+    marginTop: 12, shadowColor: '#4F46E5', shadowOpacity: 0.2, shadowRadius: 8, elevation: 3 },
+  btnCorrigirIAText: { color: '#FFF', fontWeight: '800', fontSize: 14, letterSpacing: 0.8 },
+  correcaoContainer: { marginTop: 20, backgroundColor: '#F1F5F9', borderRadius: 16, padding: 16, gap: 16 },
+  correcaoTitle: { fontSize: 14, fontWeight: '800', color: '#475569', textAlign: 'center', letterSpacing: 1 },
+  correcaoSection: { backgroundColor: '#FFF', borderRadius: 12, padding: 16 },
+  correcaoSectionTitle: { fontSize: 15, fontWeight: '800', color: '#0F172A', marginBottom: 12 },
+  correcaoText: { fontSize: 14, lineHeight: 22, color: '#334155', marginBottom: 6 },
+  
+  btnGerarDiscursiva: { backgroundColor: '#8B5CF6', borderRadius: 16, padding: 18, alignItems: 'center',
+    marginTop: 16, marginBottom: 8, shadowColor: '#7C3AED', shadowOpacity: 0.2, shadowRadius: 8, elevation: 3 },
+  btnGerarDiscursivaDisabled: { backgroundColor: '#A78BFA', opacity: 0.6 },
+  btnGerarDiscursivaText: { color: '#FFF', fontWeight: '800', fontSize: 14, letterSpacing: 0.8 },
+  btnGerarDiscursivaSubtext: { color: '#E9D5FF', fontSize: 11, marginTop: 6, fontWeight: '600' },
+  
   actionsContainer: { marginTop: 30, gap: 15 },
   tempoGasto: { backgroundColor: '#F8FAFC', borderRadius: 10, padding: 10, alignItems: 'center',
     borderWidth: 1, borderColor: '#E2E8F0' },
-  tempoGastoText: { fontSize: 13, color: '#64748B' },
+  tempoGastoText: { fontSize: 13, color: '#64748B', fontWeight: '600' },
   rowButtons: { flexDirection: 'row', gap: 10 },
   btnAction: { flex: 1, padding: 18, borderRadius: 16, alignItems: 'center', justifyContent: 'center', elevation: 2 },
   btnActionText: { color: '#FFF', fontWeight: '800', fontSize: 12, letterSpacing: 1 },
   quickExplicacao: { backgroundColor: '#F5F3FF', padding: 15, borderRadius: 12,
     borderLeftWidth: 4, borderLeftColor: '#8B5CF6' },
-  quickText: { color: '#4C1D95', fontSize: 14, lineHeight: 20 },
+  quickText: { color: '#4C1D95', fontSize: 14, lineHeight: 20, fontWeight: '500' },
   btnNext: { backgroundColor: '#1E293B', padding: 18, borderRadius: 16, alignItems: 'center' },
-  btnNextText: { color: '#FFF', fontWeight: '700' }
+  btnNextText: { color: '#FFF', fontWeight: '700', fontSize: 15 }
 });

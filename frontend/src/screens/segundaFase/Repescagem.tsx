@@ -13,9 +13,17 @@ export default function Repescagem({ navigation, route }: any) {
   const areaIdAnterior = route.params?.areaId || '';
 
   function continuarMesmaArea() {
-    navigation.navigate('AreaHome', {
-      areaId: areaIdAnterior,
-      areaNome: areaNomeAnterior,
+    if (areaIdAnterior) {
+      navigation.navigate('AreaHome', {
+        areaId: areaIdAnterior,
+        areaNome: areaNomeAnterior,
+      });
+      return;
+    }
+
+    navigation.navigate('EscolhaEstrategica', {
+      modo: 'areas',
+      origem: 'repescagem',
     });
   }
 
@@ -28,9 +36,12 @@ export default function Repescagem({ navigation, route }: any) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
-          <Text style={styles.badge}>REPECAGEM</Text>
+          <Text style={styles.badge}>REPESCAGEM</Text>
           <Text style={styles.title}>Sua nova tentativa começa aqui</Text>
           <Text style={styles.subtitle}>
             Você pode seguir com a mesma área ou escolher outra disciplina para a 2ª fase.
@@ -38,29 +49,41 @@ export default function Repescagem({ navigation, route }: any) {
         </View>
 
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>Área anterior</Text>
+          <Text style={styles.noticeLabel}>Área anterior</Text>
           <Text style={styles.noticeValue}>{areaNomeAnterior}</Text>
         </View>
 
-        <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={continuarMesmaArea}>
-          <View style={styles.cardTop}>
-            <Text style={styles.cardTitle}>Continuar com minha área</Text>
-            <Text style={styles.arrow}>›</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Retome os estudos em {areaNomeAnterior} com provas, peças e simulados.
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.cards}>
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.85}
+            onPress={continuarMesmaArea}
+          >
+            <View style={styles.cardTop}>
+              <Text style={styles.cardTitle}>Continuar com minha área</Text>
+              <Text style={styles.arrow}>›</Text>
+            </View>
 
-        <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={trocarArea}>
-          <View style={styles.cardTop}>
-            <Text style={styles.cardTitle}>Trocar área da 2ª fase</Text>
-            <Text style={styles.arrow}>›</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Escolha uma nova disciplina e reorganize sua preparação.
-          </Text>
-        </TouchableOpacity>
+            <Text style={styles.cardDescription}>
+              Retome seus estudos com provas, peças e simulados da matéria que você já vinha fazendo.
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.85}
+            onPress={trocarArea}
+          >
+            <View style={styles.cardTop}>
+              <Text style={styles.cardTitle}>Trocar área da 2ª fase</Text>
+              <Text style={styles.arrow}>›</Text>
+            </View>
+
+            <Text style={styles.cardDescription}>
+              Escolha uma nova disciplina e reorganize sua preparação para a próxima prova.
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -108,7 +131,7 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 16,
   },
-  noticeTitle: {
+  noticeLabel: {
     fontSize: 13,
     color: '#AAB6D3',
     marginBottom: 6,
@@ -118,13 +141,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
   },
+  cards: {
+    gap: 14,
+  },
   card: {
     backgroundColor: '#121A2B',
     borderWidth: 1,
     borderColor: '#1F2A44',
     borderRadius: 18,
     padding: 18,
-    marginBottom: 14,
   },
   cardTop: {
     flexDirection: 'row',

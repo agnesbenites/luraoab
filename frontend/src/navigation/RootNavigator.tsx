@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
-
 import MainNavigator from './MainNavigator';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -19,8 +18,12 @@ import ProvasReais from '../screens/segundaFase/ProvasReais';
 import SimuladoCompleto from '../screens/segundaFase/SimuladoCompleto';
 import TreinoPecas from '../screens/segundaFase/TreinoPecas';
 import Dissertativas from '../screens/segundaFase/Dissertativas';
+import DissertativasOAB from '../screens/segundaFase/DissertativasOAB';
+import DissertativasIA from '../screens/segundaFase/DissertativasIA';
 import Desempenho2fase from '../screens/segundaFase/Desempenho2fase';
 import GabaritoExame from '../screens/segundaFase/GabaritoExame';
+import ProvaExame from '../screens/segundaFase/ProvaExame';
+import Perfil from '../screens/Perfil';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,7 +41,6 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        // Usuário logado
         <>
           <Stack.Screen name="App" component={MainNavigator} />
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
@@ -53,11 +55,14 @@ export default function RootNavigator() {
           <Stack.Screen name="SimuladoCompleto" component={SimuladoCompleto} />
           <Stack.Screen name="TreinoPecas" component={TreinoPecas} />
           <Stack.Screen name="Dissertativas" component={Dissertativas} />
+          <Stack.Screen name="DissertativasOAB" component={DissertativasOAB} />
+          <Stack.Screen name="DissertativasIA" component={DissertativasIA} />
           <Stack.Screen name="Desempenho2fase" component={Desempenho2fase} />
           <Stack.Screen name="GabaritoExame" component={GabaritoExame} />
+          <Stack.Screen name="ProvaExame" component={ProvaExame} />
+          <Stack.Screen name="Perfil" component={Perfil} />
         </>
       ) : (
-        // Não logado
         <>
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
