@@ -15,11 +15,11 @@ export function LegalConsent({ onAcceptChange }: LegalConsentProps) {
   };
 
   const openTermsWebpage = async () => {
-    await Linking.openURL("https://luraoab.pages.dev/legal?tab=termos");
+    await Linking.openURL("https://luraoab.pages.dev/termos-de-uso");
   };
 
   const openPrivacyWebpage = async () => {
-    await Linking.openURL("https://luraoab.pages.dev/legal?tab=privacidade");
+    await Linking.openURL("https://luraoab.pages.dev/politica-de-privacidade");
   };
 
   return (

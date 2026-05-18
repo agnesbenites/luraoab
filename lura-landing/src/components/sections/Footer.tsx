@@ -15,10 +15,10 @@ export function Footer() {
 
         <div className={styles.metaBlock}>
           <div className={styles.links}>
-            <a href="/legal?tab=termos" className={styles.link}>
+            <a href="/termos-de-uso" className={styles.link}>
               Termos de Uso
             </a>
-            <a href="/legal?tab=privacidade" className={styles.link}>
+            <a href="/politica-de-privacidade" className={styles.link}>
               Política de Privacidade
             </a>
           </div>
