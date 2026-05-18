@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/src/components/sections/Audience.module.css"],"sourcesContent":[".section {\n  padding: 0 0 clamp(var(--space-12), 9vw, var(--space-24));\n}\n\n.grid {\n  margin-top: var(--space-8);\n  display: grid;\n  grid-template-columns: repeat(3, minmax(0, 1fr));\n  gap: var(--space-5);\n}\n\n.card {\n  padding: var(--space-6);\n  border: 1px solid var(--color-border);\n  border-radius: 24px;\n  background: var(--color-surface);\n  box-shadow: var(--shadow-sm);\n}\n\n.iconWrap {\n  width: 2.4rem;\n  height: 2.4rem;\n  border-radius: 999px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  color: #b794ff;\n  background: rgba(154, 103, 255, 0.08);\n  border: 1px solid rgba(154, 103, 255, 0.16);\n  margin-bottom: var(--space-4);\n}\n\n.card h3 {\n  font-size: var(--text-lg);\n  margin-bottom: var(--space-3);\n  line-height: 1.15;\n}\n\n.card p {\n  color: var(--color-text-muted);\n}\n\n@media (max-width: 1024px) {\n  .grid {\n    grid-template-columns: 1fr;\n  }\n}"],"names":[],"mappings":"AAAA;;;;AAIA;;;;;;;AAOA;;;;;;;;AAQA;;;;;;;;;;;;;AAaA;;;;;;AAMA;;;;AAIA;EACE"}}]
+}

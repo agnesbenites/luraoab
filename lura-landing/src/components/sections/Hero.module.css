@@ -1,0 +1,248 @@
+.hero {
+  /* Adicionado um padding-top maior para não cobrir o conteúdo por causa do Header fixo */
+  padding: calc(64px + clamp(var(--space-10), 6vw, var(--space-16))) 0 clamp(var(--space-16), 9vw, var(--space-24));
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: clamp(var(--space-8), 5vw, var(--space-16));
+  align-items: center;
+}
+
+.copy { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0; 
+}
+
+.headline {
+  font-size: clamp(2.5rem, 6.5vw, 5rem); /* Ajustado levemente para não quebrar feio em telas médias */
+  line-height: 1.02; /* Ajustado para acomodar frases maiores de forma elegante */
+  letter-spacing: -0.04em;
+  margin-top: var(--space-5);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.accentText {
+  font-style: normal;
+  color: var(--color-primary); /* O roxo pontual da marca */
+  display: block; /* Força o destaque a começar em uma linha nova com impacto */
+  margin-top: 4px;
+}
+
+.sub {
+  color: var(--color-text-muted);
+  max-width: 54ch;
+  margin-top: var(--space-6);
+  font-size: clamp(1rem, 1rem + 0.25vw, 1.15rem);
+  line-height: 1.6;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+/* NOVA CLASSE: ANCORAGEM DE PREÇO COM DESIGN PREMIUM JURÍDICO */
+.priceAnchor {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent); /* Fundo roxo bem sutil */
+  border-left: 3px solid var(--color-primary); /* Barra lateral elegante indicando destaque */
+  border-radius: 4px 16px 16px 4px;
+  max-width: 54ch;
+}
+
+.priceAnchor p {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.priceAnchor strong {
+  color: var(--color-text);
+}
+
+.proof {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-divider);
+}
+
+.proofItem { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.35rem; 
+}
+
+.proofItem strong { 
+  font-size: clamp(1.1rem, 1.25rem, 1.4rem); 
+  font-weight: 700; 
+  color: var(--color-text);
+}
+
+.proofItem span { 
+  font-size: calc(var(--text-sm) * 0.95); 
+  color: var(--color-text-muted); 
+  line-height: 1.4;
+}
+
+/* ÁREA VISUAL (BOX DO SMARTPHONE/ILUSTRAÇÃO) */
+.visual {
+  position: relative;
+  min-height: 600px;
+  border-radius: 32px;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-surface) 70%, transparent),
+    var(--color-surface-2));
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.floatingTop,
+.floatingBottom {
+  position: relative;
+  z-index: 2;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  padding: var(--space-4) var(--space-5);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 280px;
+}
+
+.floatingBottom { 
+  align-self: flex-end; 
+}
+
+.miniLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+  margin: 0;
+}
+
+.floatingTop strong,
+.floatingBottom strong {
+  display: block;
+  font-size: var(--text-sm);
+  margin-top: 0.3rem;
+  color: var(--color-text);
+}
+
+.miniLines {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: var(--space-3);
+}
+
+.miniLines span {
+  height: 6px;
+  background: var(--color-primary-highlight);
+  border-radius: var(--radius-full);
+  display: block;
+}
+
+.progressBar {
+  margin-top: var(--space-3);
+  height: 6px;
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressBar span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.illustrationWrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 4rem 2rem;
+  pointer-events: none;
+  z-index: 1; /* Fica atrás dos cards flutuantes */
+}
+
+/* RESPONSIVIDADE - TABLETS */
+@media (max-width: 1024px) {
+  .grid { 
+    grid-template-columns: 1fr; 
+    gap: var(--space-12);
+  }
+  .visual { 
+    min-height: 500px; 
+    max-width: 540px;
+    margin: 0 auto; /* Centraliza a caixa visual no tablet */
+    width: 100%;
+  }
+  .proof { 
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* Mantém 3 colunas em tablets */
+  }
+}
+
+/* RESPONSIVIDADE - SMARTPHONES (MOBILE) */
+@media (max-width: 600px) {
+  .hero {
+    padding-top: calc(74px + var(--space-6)); /* Espaço extra seguro para o header mobile */
+  }
+
+  .headline { 
+    letter-spacing: -0.03em; 
+    font-size: 2.3rem;
+  }
+  
+  .proof { 
+    grid-template-columns: 1fr; /* Quebra em lista vertical no celular */
+    gap: var(--space-6);
+  }
+  
+  .visual { 
+    min-height: 480px; 
+    padding: var(--space-4);
+    justify-content: flex-start; /* Alinha os cards no topo para não esmagar o centro */
+    gap: var(--space-4);
+  }
+
+  .floatingTop, 
+  .floatingBottom { 
+    max-width: 100%; 
+    width: 100%; 
+    position: relative; /* Mantido relativo para respeitar o fluxo e o z-index */
+    align-self: flex-start;
+  }
+  
+  .illustrationWrap { 
+    padding: 1rem;
+    opacity: 0.4; /* Reduz ligeiramente a opacidade no mobile para dar foco na leitura dos cards */
+  }
+  
+  .cta {
+    flex-direction: column;
+  }
+
+  .cta > * { 
+    width: 100%; /* Força os botões a ocuparem a largura total do celular, facilitando o clique com o polegar */
+  }
+}

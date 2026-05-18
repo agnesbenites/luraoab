@@ -1,0 +1,14 @@
+/* [project]/src/components/ui/BrandMark.module.css [app-client] (css) */
+.BrandMark-module__1HaYhq__mark {
+  background: linear-gradient(145deg, var(--color-primary), #9a67ff);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  box-shadow: var(--shadow-md);
+  border-radius: 14px;
+  flex-shrink: 0;
+  place-items: center;
+  display: grid;
+}
+
+/*# sourceMappingURL=src_components_ui_BrandMark_module_css_0w3-wzy._.single.css.map*/

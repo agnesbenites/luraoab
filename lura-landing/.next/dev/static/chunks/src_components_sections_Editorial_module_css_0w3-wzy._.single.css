@@ -1,0 +1,107 @@
+/* [project]/src/components/sections/Editorial.module.css [app-client] (css) */
+.Editorial-module__aeivOW__section {
+  padding: 0 0 clamp(var(--space-12), 9vw, var(--space-24));
+}
+
+.Editorial-module__aeivOW__band {
+  gap: var(--space-8);
+  padding: clamp(var(--space-8), 5vw, var(--space-12));
+  color: #fff;
+  background: linear-gradient(#17141f 0%, #120f18 100%);
+  border: 1px solid #b794ff24;
+  border-radius: 32px;
+  grid-template-columns: .95fr 1.05fr;
+  align-items: center;
+  display: grid;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px #08060e57;
+}
+
+.Editorial-module__aeivOW__band:before {
+  content: "";
+  background: radial-gradient(circle, #9a67ff47, #0000 68%);
+  width: 260px;
+  height: 260px;
+  position: absolute;
+  inset: auto auto -28% -10%;
+}
+
+.Editorial-module__aeivOW__copyWrap {
+  z-index: 1;
+  position: relative;
+}
+
+.Editorial-module__aeivOW__title {
+  font-size: var(--text-2xl);
+  letter-spacing: -.04em;
+  max-width: 12ch;
+  margin-top: 1rem;
+  line-height: .98;
+}
+
+.Editorial-module__aeivOW__copy {
+  color: #ffffffc2;
+  max-width: 56ch;
+  margin-top: 1rem;
+}
+
+.Editorial-module__aeivOW__points {
+  margin-top: var(--space-8);
+  gap: var(--space-4);
+  display: grid;
+}
+
+.Editorial-module__aeivOW__point {
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: #ffffff0a;
+  border: 1px solid #ffffff14;
+  border-radius: 18px;
+  align-items: flex-start;
+  display: flex;
+}
+
+.Editorial-module__aeivOW__pointIcon {
+  color: #b794ff;
+  background: #b794ff1a;
+  border: 1px solid #b794ff29;
+  border-radius: 999px;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: inline-flex;
+}
+
+.Editorial-module__aeivOW__point strong {
+  font-size: var(--text-base);
+  margin-bottom: .25rem;
+  display: block;
+}
+
+.Editorial-module__aeivOW__point p {
+  color: #ffffffb8;
+}
+
+.Editorial-module__aeivOW__visual {
+  z-index: 1;
+  padding: var(--space-5);
+  background: #ffffff0a;
+  border: 1px solid #ffffff17;
+  border-radius: 28px;
+  position: relative;
+}
+
+@media (max-width: 1024px) {
+  .Editorial-module__aeivOW__band {
+    grid-template-columns: 1fr;
+  }
+
+  .Editorial-module__aeivOW__title {
+    max-width: 14ch;
+  }
+}
+
+/*# sourceMappingURL=src_components_sections_Editorial_module_css_0w3-wzy._.single.css.map*/

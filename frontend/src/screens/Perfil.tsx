@@ -11,6 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Linking,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
@@ -29,8 +30,6 @@ type Perfil = {
 };
 
 type ModalTipo = 'email' | 'senha' | 'area' | 'reiniciar' | null;
-
-// ─── componente ─────────────────────────────────────────────────────────────
 
 export default function Perfil() {
   const navigation = useNavigation<any>();
@@ -133,7 +132,7 @@ export default function Perfil() {
     if (error) return Alert.alert('Erro', error.message);
     fecharModal();
     carregar();
-    Alert.alert('Área atualizada!');
+    Alert.alert('Área updated!');
   };
 
   const reiniciarMetricas = () => {
@@ -152,7 +151,6 @@ export default function Perfil() {
               .from('perfis')
               .update({ total_simulados: 0, acertos_total: 0, questoes_total: 0 })
               .eq('id', user.id);
-            // limpa respostas do usuário se houver tabela separada
             await supabase.from('respostas_usuario').delete().eq('user_id', user.id);
             setSalvando(false);
             fecharModal();
@@ -178,6 +176,12 @@ export default function Perfil() {
     ]);
   };
 
+  // LINK AJUSTADO PARA APONTAR DIRETO PARA A ROTA LEGAL DA LANDING PAGE
+  const handleOpenLegal = () => {
+    // Em produção você altera para 'https://luraoab.com.br/legal'
+    Linking.openURL('http://localhost:3000/legal'); 
+  };
+
   // ── render ───────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -194,7 +198,7 @@ export default function Perfil() {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* ── cabeçalho ── */}
+        {/* Cabeçalho */}
         <View style={styles.header}>
           <View style={styles.avatar}>
             <Text style={styles.avatarLetter}>
@@ -205,7 +209,7 @@ export default function Perfil() {
           <Text style={styles.email}>{user?.email}</Text>
         </View>
 
-        {/* ── estatísticas ── */}
+        {/* Progresso */}
         <Text style={styles.sectionLabel}>Seu progresso</Text>
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
@@ -222,7 +226,7 @@ export default function Perfil() {
           </View>
         </View>
 
-        {/* ── 2ª fase ── */}
+        {/* 2ª Fase */}
         <Text style={styles.sectionLabel}>2ª Fase</Text>
         <TouchableOpacity style={styles.row} onPress={() => setModal('area')} activeOpacity={0.85}>
           <View style={styles.rowLeft}>
@@ -232,7 +236,7 @@ export default function Perfil() {
           <Text style={styles.rowChevron}>›</Text>
         </TouchableOpacity>
 
-        {/* ── conta ── */}
+        {/* Conta */}
         <Text style={styles.sectionLabel}>Conta</Text>
 
         <TouchableOpacity style={styles.row} onPress={() => setModal('email')} activeOpacity={0.85}>
@@ -251,7 +255,16 @@ export default function Perfil() {
           <Text style={styles.rowChevron}>›</Text>
         </TouchableOpacity>
 
-        {/* ── zona de perigo ── */}
+        {/* BOTÃO DOS TERMOS INTEGRADO COM SEU ESTILO ORIGINAL */}
+        <TouchableOpacity style={styles.row} onPress={handleOpenLegal} activeOpacity={0.85}>
+          <View style={styles.rowLeft}>
+            <Text style={styles.rowTitle}>Termos e Políticas Legais</Text>
+            <Text style={styles.rowValue}>Documentos de privacidade e LGPD</Text>
+          </View>
+          <Text style={styles.rowChevron}>›</Text>
+        </TouchableOpacity>
+
+        {/* Zona de Perigo */}
         <Text style={styles.sectionLabel}>Zona de perigo</Text>
 
         <TouchableOpacity style={styles.rowDestructive} onPress={reiniciarMetricas} activeOpacity={0.85}>
@@ -265,14 +278,12 @@ export default function Perfil() {
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* ══ MODAL: e-mail ═══════════════════════════════════════════════════ */}
+      {/* Modais mantidos idênticos... */}
       <Modal visible={modal === 'email'} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Alterar e-mail</Text>
-            <Text style={styles.modalSub}>
-              Um link de confirmação será enviado para o novo endereço.
-            </Text>
+            <Text style={styles.modalSub}>Um link de confirmação será enviado para o novo endereço.</Text>
             <TextInput
               style={styles.input}
               placeholder="Novo e-mail"
@@ -287,16 +298,13 @@ export default function Perfil() {
                 <Text style={styles.btnSecondaryText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.btnPrimary} onPress={salvarEmail} disabled={salvando}>
-                {salvando
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={styles.btnPrimaryText}>Confirmar</Text>}
+                {salvando ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.btnPrimaryText}>Confirmar</Text>}
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* ══ MODAL: senha ════════════════════════════════════════════════════ */}
       <Modal visible={modal === 'senha'} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
@@ -322,22 +330,18 @@ export default function Perfil() {
                 <Text style={styles.btnSecondaryText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.btnPrimary} onPress={salvarSenha} disabled={salvando}>
-                {salvando
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={styles.btnPrimaryText}>Salvar</Text>}
+                {salvando ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.btnPrimaryText}>Salvar</Text>}
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* ══ MODAL: área da 2ª fase ══════════════════════════════════════════ */}
       <Modal visible={modal === 'area'} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Área da 2ª fase</Text>
             <Text style={styles.modalSub}>Escolha a matéria que você vai fazer na prova.</Text>
-
             <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
               {areas2fase.map((area) => {
                 const ativa = areaSelecionada === area.id;
@@ -349,9 +353,7 @@ export default function Perfil() {
                     activeOpacity={0.85}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.areaOptionNome, ativa && styles.areaOptionNomeAtivo]}>
-                        {area.nome}
-                      </Text>
+                      <Text style={[styles.areaOptionNome, ativa && styles.areaOptionNomeAtivo]}>{area.nome}</Text>
                       <Text style={styles.areaOptionDesc}>{area.descricao}</Text>
                     </View>
                     {ativa && <Text style={styles.areaCheck}>✓</Text>}
@@ -359,15 +361,12 @@ export default function Perfil() {
                 );
               })}
             </ScrollView>
-
             <View style={[styles.modalActions, { marginTop: 16 }]}>
               <TouchableOpacity style={styles.btnSecondary} onPress={fecharModal}>
                 <Text style={styles.btnSecondaryText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.btnPrimary} onPress={salvarArea} disabled={salvando}>
-                {salvando
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={styles.btnPrimaryText}>Salvar</Text>}
+                {salvando ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.btnPrimaryText}>Salvar</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -377,14 +376,10 @@ export default function Perfil() {
   );
 }
 
-// ─── estilos ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: t.background },
   centerFull: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: t.background },
   scroll: { padding: 24, paddingTop: 20, paddingBottom: 48 },
-
-  // cabeçalho
   header: { alignItems: 'center', marginBottom: 32 },
   avatar: {
     width: 72,
@@ -400,8 +395,6 @@ const styles = StyleSheet.create({
   avatarLetter: { fontSize: 28, fontWeight: '700', color: t.accent },
   nome: { fontSize: 20, fontWeight: '700', color: t.textPrimary, marginBottom: 4 },
   email: { fontSize: 13, color: t.textSecondary },
-
-  // seção
   sectionLabel: {
     fontSize: 11,
     fontWeight: '700',
@@ -411,8 +404,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 24,
   },
-
-  // estatísticas
   statsRow: { flexDirection: 'row', gap: 10 },
   statCard: {
     flex: 1,
@@ -425,8 +416,6 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 22, fontWeight: '700', color: t.textPrimary, marginBottom: 4 },
   statLabel: { fontSize: 12, color: t.textMuted },
-
-  // linhas
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -442,8 +431,6 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: 14, fontWeight: '600', color: t.textPrimary, marginBottom: 3 },
   rowValue: { fontSize: 13, color: t.textSecondary },
   rowChevron: { fontSize: 20, color: t.textMuted, marginLeft: 8 },
-
-  // zona de perigo
   rowDestructive: {
     backgroundColor: t.surface,
     borderRadius: 14,
@@ -454,71 +441,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   rowDestructiveText: { fontSize: 14, fontWeight: '600', color: '#e05a5a' },
-
-  // modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'flex-end',
-  },
-  modalBox: {
-    backgroundColor: t.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-    paddingBottom: 36,
-  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
+  modalBox: { backgroundColor: t.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, paddingBottom: 36 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: t.textPrimary, marginBottom: 6 },
   modalSub: { fontSize: 13, color: t.textSecondary, lineHeight: 20, marginBottom: 16 },
-
-  // input
-  input: {
-    backgroundColor: t.background,
-    borderWidth: 1,
-    borderColor: t.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: t.textPrimary,
-  },
-
-  // botões do modal
+  input: { backgroundColor: t.background, borderWidth: 1, borderColor: t.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: t.textPrimary },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  btnSecondary: {
-    flex: 1,
-    backgroundColor: t.background,
-    borderWidth: 1,
-    borderColor: t.border,
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: 'center',
-  },
+  btnSecondary: { flex: 1, backgroundColor: t.background, borderWidth: 1, borderColor: t.border, borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
   btnSecondaryText: { fontSize: 14, fontWeight: '700', color: t.textSecondary },
-  btnPrimary: {
-    flex: 1,
-    backgroundColor: t.accent,
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: 'center',
-  },
+  btnPrimary: { flex: 1, backgroundColor: t.accent, borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
   btnPrimaryText: { fontSize: 14, fontWeight: '700', color: '#fff' },
-
-  // seleção de área
-  areaOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: t.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: t.border,
-    padding: 14,
-    marginBottom: 8,
-  },
-  areaOptionAtiva: {
-    borderColor: t.accent,
-    backgroundColor: t.surface,
-  },
+  areaOption: { flexDirection: 'row', alignItems: 'center', backgroundColor: t.background, borderRadius: 12, borderWidth: 1, borderColor: t.border, padding: 14, marginBottom: 8 },
+  areaOptionAtiva: { borderColor: t.accent, backgroundColor: t.surface },
   areaOptionNome: { fontSize: 14, fontWeight: '600', color: t.textPrimary, marginBottom: 3 },
   areaOptionNomeAtivo: { color: t.accent },
   areaOptionDesc: { fontSize: 12, color: t.textMuted, lineHeight: 18 },

@@ -1,0 +1,130 @@
+.section {
+  padding: 80px 0;
+  background-color: var(--bg-surface-smooth); /* Ou o fundo padrão que estiver usando */
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.planBadge {
+  background: rgba(183, 148, 255, 0.15); /* O roxo pontual sutil */
+  color: #b794ff;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 4px;
+}
+
+.price {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.period {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.priceSub {
+  font-size: 0.95rem;
+  color: var(--text-tertiary);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 32px 0;
+}
+
+.benefitsList {
+  text-align: left;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefitItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.checkWrap {
+  color: #b794ff; /* Roxo marcando os checks */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ctaButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.secureText {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-top: 16px;
+  line-height: 1.4;
+}

@@ -1,0 +1,104 @@
+.section {
+  padding: 0 0 clamp(var(--space-12), 9vw, var(--space-24));
+}
+
+.band {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: var(--space-8);
+  align-items: center;
+  padding: clamp(var(--space-8), 5vw, var(--space-12));
+  border-radius: 32px;
+  background: linear-gradient(180deg, #17141f 0%, #120f18 100%);
+  color: white;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(183, 148, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(8, 6, 14, 0.34);
+}
+
+.band::before {
+  content: "";
+  position: absolute;
+  inset: auto auto -28% -10%;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(154, 103, 255, 0.28), transparent 68%);
+}
+
+.copyWrap {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  margin-top: 1rem;
+  font-size: var(--text-2xl);
+  max-width: 12ch;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.copy {
+  margin-top: 1rem;
+  color: rgba(255, 255, 255, 0.76);
+  max-width: 56ch;
+}
+
+.points {
+  margin-top: var(--space-8);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.point {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pointIcon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b794ff;
+  background: rgba(183, 148, 255, 0.1);
+  border: 1px solid rgba(183, 148, 255, 0.16);
+  flex-shrink: 0;
+}
+
+.point strong {
+  display: block;
+  font-size: var(--text-base);
+  margin-bottom: 0.25rem;
+}
+
+.point p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.visual {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 28px;
+  padding: var(--space-5);
+}
+
+@media (max-width: 1024px) {
+  .band {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    max-width: 14ch;
+  }
+}
