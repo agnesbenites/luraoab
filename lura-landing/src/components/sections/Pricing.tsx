@@ -13,7 +13,7 @@ const benefits = [
 ];
 
 export default function Pricing() {
-  const checkoutUrl = "COLE_AQUI_O_LINK_REAL_DO_MERCADO_PAGO";
+  const checkoutUrl = "https://mpago.la/1pcSsGH";
 
   return (
     <section className={styles.section} id="preço">
@@ -65,6 +65,8 @@ export default function Pricing() {
               size="lg"
               as="a"
               href={checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className={styles.ctaButton}
             >
               Quero ser aprovado
