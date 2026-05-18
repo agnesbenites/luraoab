@@ -13,9 +13,7 @@ const benefits = [
 ];
 
 export default function Pricing() {
-  // Substitua pelo link de checkout do seu gateway (Stripe, Asaas, etc.)
-  // Esse gateway deve estar configurado para redirecionar de volta para o app após o sucesso
-  const checkoutUrl = "https://seu-gateway-de-pagamento.com/lura-oab";
+  const checkoutUrl = "COLE_AQUI_O_LINK_REAL_DO_MERCADO_PAGO";
 
   return (
     <section className={styles.section} id="preço">
@@ -33,17 +31,24 @@ export default function Pricing() {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <span className={styles.planBadge}>Plano Mensal</span>
+
             <div className={styles.priceContainer}>
               <span className={styles.currency}>R$</span>
               <strong className={styles.price}>15,90</strong>
               <span className={styles.period}>/mês</span>
             </div>
-            <p className={styles.priceSub}>Cancele quando quiser, sem burocracia.</p>
+
+            <p className={styles.priceSub}>
+              Cancele quando quiser, sem burocracia.
+            </p>
           </div>
 
           <div className={styles.divider} />
 
-          <ul className={styles.benefitsList} aria-label="Benefícios do plano">
+          <ul
+            className={styles.benefitsList}
+            aria-label="Benefícios do plano"
+          >
             {benefits.map((benefit, index) => (
               <li key={index} className={styles.benefitItem}>
                 <span className={styles.checkWrap}>
@@ -55,11 +60,18 @@ export default function Pricing() {
           </ul>
 
           <div className={styles.actionWrap}>
-            <Button variant="primary" size="lg" as="a" href={checkoutUrl} className={styles.ctaButton}>
+            <Button
+              variant="primary"
+              size="lg"
+              as="a"
+              href={checkoutUrl}
+              className={styles.ctaButton}
+            >
               Quero ser aprovado
             </Button>
+
             <p className={styles.secureText}>
-              🔒 Pagamento 100% seguro. Você será redirecionado automaticamente de volta para o aplicativo após a conclusão.
+              🔒 Pagamento 100% seguro. Você será redirecionado para o checkout para concluir sua assinatura.
             </p>
           </div>
         </div>
