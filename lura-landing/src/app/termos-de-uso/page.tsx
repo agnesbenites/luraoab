@@ -1,6 +1,5 @@
 import { Header } from "@/components/sections/Header";
 import { Footer } from "@/components/sections/Footer";
-import styles from "../legal/Legal.module.css";
 
 export default function TermsPage() {
   const currentYear = new Date().getFullYear();
@@ -8,14 +7,31 @@ export default function TermsPage() {
   return (
     <>
       <Header />
-      <main className={styles.main}>
+      <main style={{ padding: "96px 24px" }}>
         <div className="container" style={{ maxWidth: "800px", margin: "0 auto" }}>
-          <article className={styles.contentBox}>
-            <div className={styles.legalText}>
-              <h1>Termos e Condições Gerais de Uso</h1>
-              <p className={styles.meta}>Última atualização: Maio de {currentYear}</p>
+          <article
+            style={{
+              background: "#161225",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "24px",
+              padding: "32px",
+              color: "#f5f1ff",
+            }}
+          >
+            <div style={{ display: "grid", gap: "20px" }}>
+              <h1 style={{ fontSize: "2rem", lineHeight: 1.1 }}>Termos e Condições Gerais de Uso</h1>
+              <p style={{ color: "rgba(255,255,255,0.64)" }}>
+                Última atualização: Maio de {currentYear}
+              </p>
 
-              <div className={styles.contractAlert}>
+              <div
+                style={{
+                  background: "rgba(183,148,255,0.12)",
+                  border: "1px solid rgba(183,148,255,0.28)",
+                  borderRadius: "16px",
+                  padding: "16px",
+                }}
+              >
                 <strong>TERMO DE ADESÃO ELETRÔNICO:</strong> Ao clicar em "Li e aceito os Termos de Uso" ou ao efetuar o faturamento via Mercado Pago, você adere eletronicamente a este instrumento, aceitando todas as suas cláusulas e condições contratuais.
               </div>
 
