@@ -12,15 +12,19 @@ export function Footer() {
             Inteligência Artificial e estratégia cirúrgica para a sua aprovação no Exame de Ordem.
           </p>
         </div>
-        
+
         <div className={styles.metaBlock}>
           <div className={styles.links}>
-            {/* Ajustado para apontar para a página /legal externa da Landing Page */}
-            <a href="/legal" className={styles.link}>Termos de Uso</a>
-            <a href="/legal" className={styles.link}>Políticas de Privacidade</a>
+            <a href="/legal?tab=termos" className={styles.link}>
+              Termos de Uso
+            </a>
+            <a href="/legal?tab=privacidade" className={styles.link}>
+              Política de Privacidade
+            </a>
           </div>
+
           <p className={styles.copyright}>
-            &copy; {currentYear} Lura OAB. Todos os direitos reservados. 
+            &copy; {currentYear} Lura OAB. Todos os direitos reservados.
             Desenvolvido de forma autônoma para alta performance jurídica.
           </p>
         </div>
