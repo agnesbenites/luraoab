@@ -7,8 +7,28 @@ import assinaturaRoutes from './src/routes/assinatura';
 
 dotenv.config();
 const app = express();
-app.use(cors());
+
+// CORREÇÃO: Configuração robusta de CORS aceitando o cabeçalho anti-phishing do VS Code
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With', 
+    'bypass-tunnel-reminder',
+    'X-Tunnel-Skip-Anti-Phishing-Page' // Permitido explicitamente aqui
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
+
+// Middleware para garantir que respostas tratem o bypass do Dev Tunnel
+app.use((req, res, next) => {
+  res.setHeader('bypass-tunnel-reminder', 'true');
+  next();
+});
 
 app.use('/auth', authRoutes);
 app.use('/perfil', perfilRoutes);
