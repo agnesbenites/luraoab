@@ -2,14 +2,11 @@
   "expo": {
     "name": "Lura OAB",
     "slug": "lura-oab",
+    "scheme": "luraoab",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "platforms": [
-      "android",
-      "ios",
-      "web"
-    ],
+    "platforms": ["android", "ios", "web"],
     "owner": "luraoab",
     "runtimeVersion": "1.0.0",
     "android": {

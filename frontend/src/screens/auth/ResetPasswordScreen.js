@@ -8,90 +8,141 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { supabase } from '../../db/supabase';
+import { useNavigation } from '@react-navigation/native';
+import { supabase } from '../../../db/supabase';
 
-export default function ResetPasswordScreen({ navigation }) {
+export default function ResetPasswordScreen() {
+  const navigation = useNavigation<any>();
   const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionReady, setSessionReady] = useState(false);
+  const [recoveryReady, setRecoveryReady] = useState(false);
 
   useEffect(() => {
-    async function handleRecoveryToken() {
-      if (Platform.OS === 'web') {
-        const hash = window.location.hash;
+    const prepararRecovery = async () => {
+      try {
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          const hash = window.location.hash?.replace(/^#/, '') || '';
+          const params = new URLSearchParams(hash);
 
-        if (hash && hash.includes('access_token')) {
-          const params = new URLSearchParams(hash.substring(1));
           const access_token = params.get('access_token');
           const refresh_token = params.get('refresh_token');
+          const type = params.get('type');
 
-          if (access_token && refresh_token) {
+          if (type === 'recovery' && access_token && refresh_token) {
             const { error } = await supabase.auth.setSession({
               access_token,
               refresh_token,
             });
 
-            if (!error) {
-              setSessionReady(true);
+            if (error) {
+              Alert.alert('Erro', 'Não foi possível validar o link de recuperação.');
+              return;
             }
+
+            setRecoveryReady(true);
+            return;
           }
         }
-      } else {
-        setSessionReady(true);
-      }
-    }
 
-    handleRecoveryToken();
+        const { data } = await supabase.auth.getSession();
+
+        if (data.session) {
+          setRecoveryReady(true);
+        } else {
+          Alert.alert('Link inválido', 'Solicite um novo link de redefinição de senha.');
+        }
+      } catch (e) {
+        Alert.alert('Erro', 'Não foi possível abrir o fluxo de redefinição.');
+      }
+    };
+
+    prepararRecovery();
   }, []);
 
-  const handleAtualizarSenha = async () => {
-    if (!novaSenha || novaSenha.length < 6) {
-      Alert.alert('Aviso', 'A senha precisa ter pelo menos 6 caracteres.');
-      return;
+  const handleResetPassword = async () => {
+    if (!novaSenha || !confirmarSenha) {
+      return Alert.alert('Erro', 'Preencha os dois campos.');
+    }
+
+    if (novaSenha.length < 6) {
+      return Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+    }
+
+    if (novaSenha !== confirmarSenha) {
+      return Alert.alert('Erro', 'As senhas não coincidem.');
     }
 
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: novaSenha,
+      });
 
-    setLoading(false);
+      if (error) {
+        Alert.alert('Erro', error.message);
+        return;
+      }
 
-    if (error) {
-      Alert.alert('Erro', error.message);
-      return;
+      Alert.alert('Sucesso', 'Sua senha foi redefinida com sucesso.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Login'),
+        },
+      ]);
+    } catch (e) {
+      Alert.alert('Erro', 'Não foi possível redefinir a senha.');
+    } finally {
+      setLoading(false);
     }
-
-    Alert.alert('Sucesso', 'Senha atualizada com sucesso.');
-    navigation.replace('Login');
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.logo}>Lura</Text>
       <Text style={styles.title}>Redefinir senha</Text>
+      <Text style={styles.subtitle}>
+        Digite sua nova senha para concluir a recuperação.
+      </Text>
 
-      {!sessionReady ? (
-        <Text style={styles.subtitle}>Validando link de recuperação...</Text>
-      ) : (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Nova senha"
-            placeholderTextColor="#8c8c8c"
-            secureTextEntry
-            value={novaSenha}
-            onChangeText={setNovaSenha}
-          />
+      <TextInput
+        style={styles.input}
+        placeholder="Nova senha"
+        placeholderTextColor="#999"
+        secureTextEntry
+        value={novaSenha}
+        onChangeText={setNovaSenha}
+        editable={recoveryReady && !loading}
+      />
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleAtualizarSenha}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? 'Atualizando...' : 'Atualizar senha'}
-            </Text>
-          </TouchableOpacity>
-        </>
+      <TextInput
+        style={styles.input}
+        placeholder="Confirmar nova senha"
+        placeholderTextColor="#999"
+        secureTextEntry
+        value={confirmarSenha}
+        onChangeText={setConfirmarSenha}
+        editable={recoveryReady && !loading}
+      />
+
+      <TouchableOpacity
+        style={[
+          styles.btn,
+          (!recoveryReady || loading) && styles.btnDisabled,
+        ]}
+        onPress={handleResetPassword}
+        disabled={!recoveryReady || loading}
+      >
+        <Text style={styles.btnText}>
+          {loading ? 'Salvando...' : 'Salvar nova senha'}
+        </Text>
+      </TouchableOpacity>
+
+      {!recoveryReady && (
+        <Text style={styles.helper}>
+          Validando link de recuperação...
+        </Text>
       )}
     </View>
   );
@@ -102,34 +153,57 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f0f1a',
     justifyContent: 'center',
-    padding: 24,
+    padding: 28,
+  },
+  logo: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#7C3AED',
+    textAlign: 'center',
+    marginBottom: 6,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 16,
+    color: '#fff',
     textAlign: 'center',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   subtitle: {
-    color: '#a0a0a0',
+    color: '#aaa',
     textAlign: 'center',
+    marginBottom: 32,
+    fontSize: 15,
   },
   input: {
-    backgroundColor: '#15142b',
+    backgroundColor: '#1a1a2e',
+    color: '#fff',
     borderRadius: 12,
-    padding: 14,
-    color: '#FFFFFF',
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 14,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: '#2a2a3e',
   },
-  button: {
+  btn: {
     backgroundColor: '#7C3AED',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
+    marginTop: 8,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  btnDisabled: {
+    opacity: 0.6,
+  },
+  btnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  helper: {
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 13,
   },
 });
