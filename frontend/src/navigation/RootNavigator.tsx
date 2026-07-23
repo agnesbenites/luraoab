@@ -24,6 +24,7 @@ import Desempenho2fase from '../screens/segundaFase/Desempenho2fase';
 import GabaritoExame from '../screens/segundaFase/GabaritoExame';
 import ProvaExame from '../screens/segundaFase/ProvaExame';
 import Perfil from '../screens/Perfil';
+import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -77,6 +78,7 @@ export default function RootNavigator() {
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         </>
       )}
     </Stack.Navigator>

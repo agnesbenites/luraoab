@@ -176,64 +176,6 @@ export default function Perfil() {
     ]);
   };
 
-  const excluirConta = () => {
-    Alert.alert(
-      'Excluir conta',
-      'Esta ação é permanente e irreversível. Todos os seus dados serão removidos imediatamente e não poderão ser recuperados.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir minha conta',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Tem certeza?',
-              'Após a confirmação, sua conta será excluída imediatamente.',
-              [
-                { text: 'Voltar', style: 'cancel' },
-                {
-                  text: 'Sim, excluir',
-                  style: 'destructive',
-                  onPress: async () => {
-                    if (!user) return;
-                    setSalvando(true);
-                    try {
-                      // Obtém o token da sessão atual
-                      const { data: { session } } = await supabase.auth.getSession();
-                      if (!session) throw new Error('Sessão inválida');
-
-                      // Chama o endpoint de exclusão no backend (remove tudo incluindo auth.users)
-                      const response = await fetch(
-                        `${process.env.EXPO_PUBLIC_API_URL}/auth/excluir-conta`,
-                        {
-                          method: 'DELETE',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${session.access_token}`,
-                          },
-                        }
-                      );
-
-                      const result = await response.json();
-                      if (!response.ok) throw new Error(result.erro || 'Erro desconhecido');
-
-                      await supabase.auth.signOut();
-                      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-                    } catch (e: any) {
-                      Alert.alert('Erro', e.message || 'Não foi possível excluir a conta. Tente novamente.');
-                    } finally {
-                      setSalvando(false);
-                    }
-                  },
-                },
-              ]
-            );
-          },
-        },
-      ]
-    );
-  };
-
   // LINK AJUSTADO PARA APONTAR DIRETO PARA A ROTA LEGAL DA LANDING PAGE
   const handleOpenLegal = () => {
     // Em produção você altera para 'https://luraoab.com.br/legal'
@@ -331,10 +273,6 @@ export default function Perfil() {
 
         <TouchableOpacity style={styles.rowDestructive} onPress={sair} activeOpacity={0.85}>
           <Text style={styles.rowDestructiveText}>Sair da conta</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.rowDestructive} onPress={excluirConta} activeOpacity={0.85} disabled={salvando}>
-          <Text style={styles.rowDestructiveText}>Excluir conta permanentemente</Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />

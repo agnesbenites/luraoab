@@ -7,3 +7,7 @@ dist/
 provas/
 tools/
 dist/
+
+.expo/
+.expo/
+credentials/

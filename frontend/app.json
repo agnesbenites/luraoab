@@ -3,16 +3,28 @@
     "name": "Lura OAB",
     "slug": "lura-oab",
     "version": "1.0.0",
-    "platforms": ["ios", "android", "web"],
-    "web": {
-      "bundler": "metro"
-    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
+    "owner": "luraoab",
+    "runtimeVersion": "1.0.0",
     "android": {
-      "package": "com.kasleeapp.luraoab"
+      "package": "com.kaslee.luraoab",
+      "versionCode": 11
+    },
+    "ios": {
+      "runtimeVersion": "1.0.0"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e421e502-99cf-46b2-aab2-1801b266289b"
     },
     "extra": {
       "eas": {
-        "projectId": "d3afc5c8-94b4-412a-b223-9c3a98107ddb"
+        "projectId": "e421e502-99cf-46b2-aab2-1801b266289b"
       }
     },
     "plugins": [

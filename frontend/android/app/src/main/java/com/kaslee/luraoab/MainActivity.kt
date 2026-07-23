@@ -1,4 +1,4 @@
-package com.kasleeapp.luraoab
+package com.kaslee.luraoab
 
 import android.os.Build
 import android.os.Bundle
